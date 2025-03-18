@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dividir PDF</title>
+</head>
+<body>
+    <h2>Sube tus archivos</h2>
+    <form id="upload-form" enctype="multipart/form-data">
+        <label for="course_name">Nombre del curso:</label>
+        <input type="text" id="course_name" name="course_name" required><br><br>
+        
+        <label for="pdf_file">Selecciona el archivo PDF:</label>
+        <input type="file" id="pdf_file" name="pdf_file" accept="application/pdf" required><br><br>
+
+        <label for="excel_file">Selecciona el archivo Excel:</label>
+        <input type="file" id="excel_file" name="excel_file" accept=".xlsx" required><br><br>
+
+        <button type="submit">Procesar</button>
+    </form>
+    
+    <a id="download-link" style="display: none;" download="result.zip">Descargar ZIP</a>
+    
+    <script>
+        document.getElementById('upload-form').onsubmit = async function(event) {
+            event.preventDefault();
+            
+            // Obtener el nombre del curso desde el formulario
+            let courseName = document.getElementById('course_name').value.trim();
+            if (!courseName) {
+                alert("Por favor ingresa el nombre del curso.");
+                return;
+            }
+
+            // Crear el nombre del archivo con el nombre del curso
+            let zipFileName = `${courseName}_constancias.zip`;
+            
+            let formData = new FormData(this);
+            
+            let response = await fetch('/process', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                let blob = await response.blob();
+                let url = window.URL.createObjectURL(blob);
+                
+                let link = document.getElementById('download-link');
+                link.href = url;
+                
+                // Cambiar el nombre del archivo de descarga
+                link.setAttribute("download", zipFileName);
+
+                link.style.display = 'block';
+                link.innerText = 'Descargar Resultados';
+            } else {
+                alert("Error en el procesamiento");
+            }
+        };
+    </script>
+</body>
+</html>
